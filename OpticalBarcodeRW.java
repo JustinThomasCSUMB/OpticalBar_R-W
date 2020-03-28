@@ -39,7 +39,7 @@ class BarcodeImage implements Cloneable
    public static final int MAX_WIDTH = 65;
    private boolean[][] imageData;
   
-   public BarcodeImage()
+   BarcodeImage()
    {
       imageData = new boolean[MAX_HEIGHT][MAX_WIDTH];
       
@@ -48,6 +48,33 @@ class BarcodeImage implements Cloneable
       }
       // TODO: Marcos delete test
       //System.out.println(Arrays.deepToString(imageData));
+   }
+   
+   BarcodeImage(String[] strData) {
+      
+   }
+   
+   private Boolean checkSize(String[] data) {
+      // Check for a null string
+      if (data == null) {
+         return false;
+      }
+      // Make sure the array doesn't have more strings than would fit MAX_HEIGHT
+      if (data.length > MAX_HEIGHT) {
+         return false;
+      }
+      /* Check each string for any nulls as well as make sure each string is not
+       * longer than MAX_WIDTH */
+      for (int i = 0; i < data.length; i++) {
+         if (data[i] == null) {
+            return false;
+         }
+         if (data[i].length() > MAX_WIDTH) {
+            return false;
+         }
+      }
+      // If non of our checks get triggered return true
+      return true;
    }
    
    public Object clone()
