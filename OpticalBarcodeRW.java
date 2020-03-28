@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 public class OpticalBarcodeRW
 {
    public static void main( String [] args)
@@ -38,7 +40,12 @@ class BarcodeImage implements Cloneable
   
    public BarcodeImage()
    {
-      imageData = new boolean[65][30];
+      imageData = new boolean[MAX_WIDTH][MAX_HEIGHT];
+      
+      for (boolean[] row: imageData) {
+         Arrays.fill(row, false);
+      }
+      System.out.println(Arrays.deepToString(imageData));
    }
    
    public Object clone()
