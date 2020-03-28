@@ -10,6 +10,7 @@ public class OpticalBarcodeRW
       
       barcode2 = (BarcodeImage) barcode1.clone();
       
+      /* TODO: Delete Clone Confirmation
       if (barcode1 == barcode2)
       {
          System.out.println("Clone was unsuccessful");
@@ -17,7 +18,7 @@ public class OpticalBarcodeRW
       else
       {
          System.out.println("Clone was successful");
-      }
+      } */
    }
 }
 
@@ -40,12 +41,13 @@ class BarcodeImage implements Cloneable
   
    public BarcodeImage()
    {
-      imageData = new boolean[MAX_WIDTH][MAX_HEIGHT];
+      imageData = new boolean[MAX_HEIGHT][MAX_WIDTH];
       
       for (boolean[] row: imageData) {
          Arrays.fill(row, false);
       }
-      System.out.println(Arrays.deepToString(imageData));
+      // TODO: Marcos delete test
+      //System.out.println(Arrays.deepToString(imageData));
    }
    
    public Object clone()
