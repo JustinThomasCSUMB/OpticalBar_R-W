@@ -124,6 +124,26 @@ class BarcodeImage implements Cloneable
       }
    }
    
+   // Accessors and Mutators (Getters and Setters)
+   public boolean getPixel(int row, int col) {
+      /* Since imageData is a boolean array we need to check the bounds of
+       * the array request to prevent an index out of bounds error.
+       */
+      if (row < 0 || row > MAX_HEIGHT || col < 0 || col > MAX_WIDTH) {
+         System.out.println("Requested pixel is out of bounds!");
+         return false;
+      }
+      else {
+         return imageData[row][col];
+      }
+   }
+   
+   public boolean setPixel(int row, int col, boolean value) {
+      return value;
+      
+   }
+   
+   // Private Helper Methods
    private Boolean checkSize(String[] data) {
       // Check for a null string
       if (data == null) {
