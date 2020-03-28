@@ -3,12 +3,54 @@ import java.util.Arrays;
 public class OpticalBarcodeRW
 {
    public static void main( String [] args)
-   {     
+   {
+      String[] sImageIn =
+         {
+            "                                               ",
+            "                                               ",
+            "                                               ",
+            "     * * * * * * * * * * * * * * * * * * * * * ",
+            "     *                                       * ",
+            "     ****** **** ****** ******* ** *** *****   ",
+            "     *     *    ****************************** ",
+            "     * **    * *        **  *    * * *   *     ",
+            "     *   *    *  *****    *   * *   *  **  *** ",
+            "     *  **     * *** **   **  *    **  ***  *  ",
+            "     ***  * **   **  *   ****    *  *  ** * ** ",
+            "     *****  ***  *  * *   ** ** **  *   * *    ",
+            "     ***************************************** ",
+            "                                               ",
+            "                                               ",
+            "                                               "
+         };
+      // TODO: Delete Marcos Bad String Test
+      String[] badImageIn =
+         {
+            "                                               ",
+       "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890QWERTYALLYOURBASEBELONGTOUSAB12345",
+            "                                               ",
+            "     * * * * * * * * * * * * * * * * * * * * * ",
+            "     *                                       * ",
+            "     ****** **** ****** ******* ** *** *****   ",
+            "     *     *    ****************************** ",
+            "     * **    * *        **  *    * * *   *     ",
+            "     *   *    *  *****    *   * *   *  **  *** ",
+            "     *  **     * *** **   **  *    **  ***  *  ",
+            "     ***  * **   **  *   ****    *  *  ** * ** ",
+            "     *****  ***  *  * *   ** ** **  *   * *    ",
+            "     ***************************************** ",  
+            "                                               ",
+            "                                               ",
+            "                                               "
+         };
       // Clone Test
-      BarcodeImage barcode1 = new BarcodeImage();
+      BarcodeImage barcode1 = new BarcodeImage(sImageIn);
       BarcodeImage barcode2 = new BarcodeImage();
       
       barcode2 = (BarcodeImage) barcode1.clone();
+      
+      // TODO: Delete bad Image Test
+      //BarcodeImage badbarcode = new BarcodeImage(badImageIn);
       
       /* TODO: Delete Clone Confirmation
       if (barcode1 == barcode2)
@@ -51,7 +93,35 @@ class BarcodeImage implements Cloneable
    }
    
    BarcodeImage(String[] strData) {
+      // Chain the non parameterized constructor to pull in populated imageData
+      this();
+      // First check strData to make sure there is good data
+      if (!checkSize(strData)) {
+         System.out.println("There is an error with the data input!");
+      }
+      // We are going to be looping through a lot of ints so let's declare
+      int imageDataRow, strDataRow;
       
+      /*
+       * We have two multidimensional arrays if we consider a string to be an
+       * array of chars. We need to keep track of our position in both arrays.
+       * Outer Loop: Loop from the bottom row of each array until we reach row 0
+       * of strData
+       */
+      for (imageDataRow = MAX_HEIGHT - 1, strDataRow = strData.length - 1;
+            strDataRow >= 0; imageDataRow--, strDataRow--) {
+         /*
+          * Inner Loop: Loop through each column of strData until you reach the
+          * length of each string (This will deal with variable string lengths).
+          * The integer column will be the same for each array in the inner loop
+          * If the char at the same column position in strData is not blank
+          * then change the column position in imageData to True; 
+          */
+         for (int column = 0; column < strData[strDataRow].length(); column++) {
+            imageData[imageDataRow][column] = 
+                  (strData[strDataRow].charAt(column) != ' ');
+         }
+      }
    }
    
    private Boolean checkSize(String[] data) {
