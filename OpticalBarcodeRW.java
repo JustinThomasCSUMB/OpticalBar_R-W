@@ -282,40 +282,55 @@ class DataMatrix implements BarcodeIO
     */
    private void cleanImage() {
       int rowStart = -1;
+      int columnStart = -1;
       String tempRow;
       String[] cleanedImage= new String[BarcodeImage.MAX_HEIGHT];
+      Arrays.fill(cleanedImage, "");
       
-      for(int r = BarcodeImage.MAX_HEIGHT; r > 0; r--) {
+      for(int r = BarcodeImage.MAX_HEIGHT - 1; r >= 0; r--) {
          // walk through rows starting at the last row
          tempRow = "";
-         for(int c = 0; c < BarcodeImage.MAX_WIDTH; c--) {
+         for(int c = 0; c < BarcodeImage.MAX_WIDTH; c++) {
             // walk through columns starting at position 0
             boolean pixel = image.getPixel(r, c);
             
-            if(rowStart == -1 && pixel) {
-               rowStart = c;
+            if(columnStart == -1 && pixel) {
                // found beginning of row flag, set only once
+               columnStart = c;
             }
             
-            // copy the row for the image
-            if(rowStart != -1) {
+            if(rowStart == -1 && pixel) {
+               rowStart = r;
+            }
+            
+            // copy the row for the image, starting after left Limitation line
+            if(columnStart != -1 && c >= columnStart) {
                tempRow = tempRow + (pixel?BLACK_CHAR:WHITE_CHAR);
             }
          }// end c loop
          
-         // blank row
-         if(rowStart == -1) {
-            for(int i = 0; i < BarcodeImage.MAX_WIDTH; i++) {
-               tempRow += " ";
+         // fill in the row offset
+         if(columnStart != -1) {
+         // check maxwidth, don't write past max (blank row cases)
+            if(tempRow.length() < BarcodeImage.MAX_WIDTH) {
+               for(int i = 0; i < columnStart; i++) {
+                  tempRow += " ";
+               }   
             }            
-         // data row, append offset
-         }else {
-            for(int i = 0; i < rowStart; i++) {
-               tempRow += " ";
-            }
-         }         
-          cleanedImage[r] = tempRow;        
+            int writingRow = (BarcodeImage.MAX_HEIGHT - 1 - rowStart) + r;
+            cleanedImage[writingRow] = tempRow;  
+         }                         
       }// end r loop
+      
+      int writingRow = (BarcodeImage.MAX_HEIGHT - 1 - rowStart);
+      // fill in remaining rows from offset
+      for(int i = writingRow; i >= 0; i--) {
+         tempRow = "";
+         for(int j = 0; j < BarcodeImage.MAX_WIDTH; j++) {
+            tempRow += " ";
+         }
+         cleanedImage[i] = tempRow;
+      }
       
       image = new BarcodeImage(cleanedImage);
       
