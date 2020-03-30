@@ -46,6 +46,7 @@ public class OpticalBarcodeRW
       // Clone Test
       BarcodeImage barcode1 = new BarcodeImage(sImageIn);
       BarcodeImage barcode2 = new BarcodeImage();
+      DataMatrix dm = new DataMatrix(barcode1);
       
       barcode2 = (BarcodeImage) barcode1.clone();
       
@@ -61,12 +62,12 @@ public class OpticalBarcodeRW
       {
          System.out.println("Clone was successful");
       } */
-   }
-}
+   }// end Main   
+}// end OpticalBarcodeRW
 
 interface BarcodeIO
 {
-   public boolean scan(BarcodeImage bc);
+   public boolean scan(BarcodeImage bcImage);
    public boolean readText(String text);
    public boolean generateImageFromText();
    public boolean translateImageToText();
@@ -83,13 +84,7 @@ class BarcodeImage implements Cloneable
   
    BarcodeImage()
    {
-      imageData = new boolean[MAX_HEIGHT][MAX_WIDTH];
-      
-      for (boolean[] row: imageData) {
-         Arrays.fill(row, false);
-      }
-      // TODO: Marcos delete test
-      //System.out.println(Arrays.deepToString(imageData));
+      imageData = new boolean[MAX_HEIGHT][MAX_WIDTH];      
    }
    
    BarcodeImage(String[] strData) {
@@ -118,8 +113,9 @@ class BarcodeImage implements Cloneable
           * then change the column position in imageData to True; 
           */
          for (int column = 0; column < strData[strDataRow].length(); column++) {
-            imageData[imageDataRow][column] = 
-                  (strData[strDataRow].charAt(column) != ' ');
+            boolean value = (strData[strDataRow].charAt(column) != ' ');
+            imageData[imageDataRow][column] = value;                  
+            setPixel(imageDataRow, column, value);
          }
       }
    }
@@ -190,8 +186,140 @@ class BarcodeImage implements Cloneable
    }
 }
 
-/**class DataMatrix implements BarcodeIO
+class DataMatrix implements BarcodeIO
 {
+   public static final char BLACK_CHAR = '*';
+   public static final char WHITE_CHAR = ' ';
    
-}**/
+   private BarcodeImage image;
+   private String text;
+   private int actualWidth = 0;
+   private int actualHeight = 0;
+   
+   DataMatrix(){
+      image = new BarcodeImage();
+      text = "";
+   }
+   
+   DataMatrix(BarcodeImage image){
+      if(image == null) {
+         this.image = new BarcodeImage();
+      }
+      this.scan(image);
+      text = "";
+   }
+   
+   DataMatrix(String text){
+      image = new BarcodeImage();
+      this.text = text;
+   }
+   
+   public int getActualWidth() {
+      return actualWidth;
+   }
+   
+   public int getActualHeight() {
+      return actualHeight;
+   }
+      
+   @Override
+   public boolean scan(BarcodeImage bcImage)
+   {  
+      try {
+         this.image = (BarcodeImage)bcImage.clone();
+         cleanImage();
+      }catch(Exception ex) {
+         return false;
+      }
+      
+      return true;
+   }
+
+   @Override
+   public boolean readText(String text)
+   {
+      if(text == null) {
+         return false;
+      }
+      
+      this.text = text;
+      return true;
+   }
+
+   @Override
+   public boolean generateImageFromText()
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public boolean translateImageToText()
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public void displayTextToConsole()
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   @Override
+   public void displayImageToConsole()
+   {
+      // TODO Auto-generated method stub
+      
+   }
+   
+   /**
+    * walks through the image starting at bottom left corner
+    * finds first pixel for starting row and sets the offset
+    * writes content to tempRow and fills in offset
+    * creates BarcodeImage and assigns to image
+    */
+   private void cleanImage() {
+      int rowStart = -1;
+      String tempRow;
+      String[] cleanedImage= new String[BarcodeImage.MAX_HEIGHT];
+      
+      for(int r = BarcodeImage.MAX_HEIGHT; r > 0; r--) {
+         // walk through rows starting at the last row
+         tempRow = "";
+         for(int c = 0; c < BarcodeImage.MAX_WIDTH; c--) {
+            // walk through columns starting at position 0
+            boolean pixel = image.getPixel(r, c);
+            
+            if(rowStart == -1 && pixel) {
+               rowStart = c;
+               // found beginning of row flag, set only once
+            }
+            
+            // copy the row for the image
+            if(rowStart != -1) {
+               tempRow = tempRow + (pixel?BLACK_CHAR:WHITE_CHAR);
+            }
+         }// end c loop
+         
+         // blank row
+         if(rowStart == -1) {
+            for(int i = 0; i < BarcodeImage.MAX_WIDTH; i++) {
+               tempRow += " ";
+            }            
+         // data row, append offset
+         }else {
+            for(int i = 0; i < rowStart; i++) {
+               tempRow += " ";
+            }
+         }         
+          cleanedImage[r] = tempRow;        
+      }// end r loop
+      
+      image = new BarcodeImage(cleanedImage);
+      
+   }
+   
+}// end DataMatrix
 
