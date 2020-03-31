@@ -478,6 +478,7 @@ class DataMatrix implements BarcodeIO
    @Override
    public boolean translateImageToText()
    {
+      this.text = "";
       for(int c = 1; c < this.actualWidth - 1; c++) 
       {
          this.text += readCharFromCol(c);
@@ -494,9 +495,14 @@ class DataMatrix implements BarcodeIO
    @Override
    public void displayImageToConsole()
    {
+      for(int b = 0; b < this.actualWidth + 2; b++) 
+      {
+         System.out.print("_");
+      }
+      System.out.println();
       for(int r = BarcodeImage.MAX_HEIGHT - this.actualHeight; r < BarcodeImage.MAX_HEIGHT; r++) 
       {
-         
+         System.out.print("|");
          for(int c = 0; c <= this.actualWidth - 1; c++) 
          {
             if(image.getPixel(r, c)) 
@@ -508,11 +514,9 @@ class DataMatrix implements BarcodeIO
                System.out.print(" ");
             }
          }
-         
-         System.out.println();
-         
+         System.out.print("|");
+         System.out.println();         
       }
- 
    }
    
    /**
