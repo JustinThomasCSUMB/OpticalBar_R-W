@@ -18,6 +18,72 @@ public class OpticalBarcodeRW
             "     *  **     * *** **   **  *    **  ***  *  ",
             "     ***  * **   **  *   ****    *  *  ** * ** ",
             "     *****  ***  *  * *   ** ** **  *   * *    ",
+            "     ***************************************** ",  
+            "                                               ",
+            "                                               ",
+            "                                               "
+
+         };      
+               
+            
+         
+         String[] sImageIn_2 =
+         {
+               "                                          ",
+               "                                          ",
+               "* * * * * * * * * * * * * * * * * * *     ",
+               "*                                    *    ",
+               "**** *** **   ***** ****   *********      ",
+               "* ************ ************ **********    ",
+               "** *      *    *  * * *         * *       ",
+               "***   *  *           * **    *      **    ",
+               "* ** * *  *   * * * **  *   ***   ***     ",
+               "* *           **    *****  *   **   **    ",
+               "****  *  * *  * **  ** *   ** *  * *      ",
+               "**************************************    ",
+               "                                          ",
+               "                                          ",
+               "                                          ",
+               "                                          "
+
+         };
+        
+         BarcodeImage bc = new BarcodeImage(sImageIn);
+         DataMatrix dm = new DataMatrix(bc);
+        
+         // First secret message
+         dm.translateImageToText();
+         dm.displayTextToConsole();
+         dm.displayImageToConsole();
+         
+         // second secret message
+         bc = new BarcodeImage(sImageIn_2);
+         dm.scan(bc);
+         dm.translateImageToText();
+         dm.displayTextToConsole();
+         dm.displayImageToConsole();
+         
+         // create your own message
+         dm.readText("What a great resume builder this is!");
+         dm.generateImageFromText();
+         dm.translateImageToText();
+         dm.displayTextToConsole();
+         dm.displayImageToConsole();
+      /*
+      String[] sImageIn =
+         {
+            "                                               ",
+            "                                               ",
+            "                                               ",
+            "     * * * * * * * * * * * * * * * * * * * * * ",
+            "     *                                       * ",
+            "     ****** **** ****** ******* ** *** *****   ",
+            "     *     *    ****************************** ",
+            "     * **    * *        **  *    * * *   *     ",
+            "     *   *    *  *****    *   * *   *  **  *** ",
+            "     *  **     * *** **   **  *    **  ***  *  ",
+            "     ***  * **   **  *   ****    *  *  ** * ** ",
+            "     *****  ***  *  * *   ** ** **  *   * *    ",
             "     ***************************************** ",
             "                                               ",
             "                                               ",
@@ -207,6 +273,7 @@ class DataMatrix implements BarcodeIO
       }
       this.scan(image);
       text = "";
+
    }
    
    DataMatrix(String text){
@@ -231,7 +298,24 @@ class DataMatrix implements BarcodeIO
       }catch(Exception ex) {
          return false;
       }
+      this.actualHeight = 0;
+      this.actualWidth = 0;
+      for(int r = BarcodeImage.MAX_HEIGHT - 1; r >= 0; r--) 
+      {
+         if(image.getPixel(r, 0)) 
+         {
+            this.actualHeight++;
+         }
+      }
       
+      for(int c = 0; c <= BarcodeImage.MAX_WIDTH -1; c++) 
+      {
+         if(image.getPixel(BarcodeImage.MAX_HEIGHT - 1, c)) 
+         {
+            this.actualWidth++;
+         }
+      }
+
       return true;
    }
 
@@ -245,33 +329,190 @@ class DataMatrix implements BarcodeIO
       this.text = text;
       return true;
    }
+   
+   private char readCharFromCol(int col) 
+   {
+      int bitVal = 0;
+      int currentRow = 0;
+      for(int r = BarcodeImage.MAX_HEIGHT - this.actualHeight + 1; r < BarcodeImage.MAX_HEIGHT - 1; r++) 
+      {
+         currentRow++;
+         if(image.getPixel( r , col)) 
+         {
+            switch(currentRow) {
+            case 1 : 
+               bitVal += 128;
+               break;
+            case 2 :
+               bitVal += 64;
+               break;
+            case 3 :
+               bitVal += 32;
+               break;
+            case 4 :
+               bitVal += 16;
+               break;
+            case 5 :
+               bitVal += 8;
+               break;
+            case 6 :
+               bitVal += 4;
+               break;
+            case 7 :
+               bitVal += 2;
+               break;
+            case 8 :
+               bitVal += 1;
+               break;
+            }
+         }
+      }
+      return (char)bitVal;
+   }
+   
+   private boolean writeCharToCol(int col, int code) 
+   {
+      int asciiVal = code;
+      int currentRow = BarcodeImage.MAX_HEIGHT - this.actualHeight + 1;
+      
+      if(asciiVal - 128 >= 0) 
+      {
+         asciiVal -= 128;
+         image.setPixel(currentRow, col, true);
+      }
+      
+      currentRow++;
+      
+      if(asciiVal - 64 >= 0) 
+      {
+         asciiVal -= 64;
+         image.setPixel(currentRow, col, true);
+      }
+      
+      currentRow++;
+      
+      if(asciiVal - 32 >= 0)
+      {
+         asciiVal -= 32; 
+         image.setPixel(currentRow, col, true);
+      }
+      
+      currentRow++;
+      
+      if(asciiVal - 16 >= 0) 
+      {
+         asciiVal -= 16;   
+         image.setPixel(currentRow, col, true);
+      }
+      
+      currentRow++;
+      
+      if(asciiVal - 8 >= 0) 
+      {
+         asciiVal -= 8;  
+         image.setPixel(currentRow, col, true);
+      }
+      
+      currentRow++;
+      
+      if(asciiVal - 4 >= 0) 
+      {
+         asciiVal -= 4;   
+         image.setPixel(currentRow, col, true);
+      }
+      
+      currentRow++;
+      
+      if(asciiVal - 2 >= 0) 
+      {
+         asciiVal -= 2;  
+         image.setPixel(currentRow, col, true);
+      }
+      
+      currentRow++;
+      
+      if(asciiVal - 1 >= 0) 
+      {
+         asciiVal -= 1;
+         image.setPixel(currentRow, col, true);
+      }
+      
+      currentRow++;
+      
+      if(asciiVal == 0) 
+      {
+         return true;
+      }
+      
+      return false;
+   }
 
    @Override
    public boolean generateImageFromText()
    {
-      // TODO Auto-generated method stub
+      this.image = new BarcodeImage();
+
+      for(int row = BarcodeImage.MAX_HEIGHT - this.actualHeight; row < BarcodeImage.MAX_HEIGHT; row ++) 
+      {
+         image.setPixel(row, 0, true);
+      }
+      
+      for(int col = 0; col < text.length() + 1; col++) 
+      {   
+         if(col % 2 == 0 ) 
+         {
+            image.setPixel(BarcodeImage.MAX_HEIGHT - this.actualHeight, col, true);
+         }
+         
+         image.setPixel(BarcodeImage.MAX_HEIGHT - 1, col, true);
+      }
+      
+      for(int i = 1; i <= this.text.length(); i++) 
+      {
+         writeCharToCol(i, this.text.charAt(i - 1));
+      }
+
       return false;
    }
 
    @Override
    public boolean translateImageToText()
    {
-      // TODO Auto-generated method stub
+      for(int c = 1; c < this.actualWidth - 1; c++) 
+      {
+         this.text += readCharFromCol(c);
+      }
       return false;
    }
 
    @Override
    public void displayTextToConsole()
    {
-      // TODO Auto-generated method stub
-      
+      System.out.println(text);
    }
 
    @Override
    public void displayImageToConsole()
    {
-      // TODO Auto-generated method stub
-      
+      for(int r = BarcodeImage.MAX_HEIGHT - this.actualHeight; r < BarcodeImage.MAX_HEIGHT; r++) 
+      {
+         
+         for(int c = 0; c <= this.actualWidth - 1; c++) 
+         {
+            if(image.getPixel(r, c)) 
+            {
+               System.out.print("*");
+            }
+            else 
+            {
+               System.out.print(" ");
+            }
+         }
+         
+         System.out.println();
+         
+      }
+ 
    }
    
    /**
@@ -332,7 +573,7 @@ class DataMatrix implements BarcodeIO
          cleanedImage[i] = tempRow;
       }
       
-      image = new BarcodeImage(cleanedImage);
+      this.image = new BarcodeImage(cleanedImage);
       
    }
    
