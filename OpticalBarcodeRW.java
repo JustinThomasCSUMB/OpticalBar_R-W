@@ -330,6 +330,8 @@ class DataMatrix implements BarcodeIO
       return true;
    }
    
+   //Skips over the Closed Line Limitation and adds the bit values together
+   //returns the ascii character with the value of the int
    private char readCharFromCol(int col) 
    {
       int bitVal = 0;
@@ -370,6 +372,8 @@ class DataMatrix implements BarcodeIO
       return (char)bitVal;
    }
    
+   //takes the given col number and ascii value and puts them in the correct
+   //bit value locations
    private boolean writeCharToCol(int col, int code) 
    {
       int asciiVal = code;
@@ -448,41 +452,68 @@ class DataMatrix implements BarcodeIO
    }
 
    @Override
+   //converts a text input to a Datamatrix
+   //calls BarcodeImage.setPixel(int, int, bool)
+   //calls writeCharToCol(int, char)
    public boolean generateImageFromText()
    {
       this.image = new BarcodeImage();
-
-      for(int row = BarcodeImage.MAX_HEIGHT - this.actualHeight; row < BarcodeImage.MAX_HEIGHT; row ++) 
+      try 
       {
-         image.setPixel(row, 0, true);
-      }
-      
-      for(int col = 0; col < text.length() + 1; col++) 
-      {   
-         if(col % 2 == 0 ) 
+         //loops through the 2D array and positions the datamatrix in the lower
+         //self
+         for(int row = BarcodeImage.MAX_HEIGHT - this.actualHeight; 
+               row < BarcodeImage.MAX_HEIGHT; row ++) 
          {
-            image.setPixel(BarcodeImage.MAX_HEIGHT - this.actualHeight, col, true);
+            image.setPixel(row, 0, true);
+         }
+      
+         for(int col = 0; col < text.length() + 1; col++) 
+         {   
+            if(col % 2 == 0 ) 
+            {
+               image.setPixel(BarcodeImage.MAX_HEIGHT - this.actualHeight, 
+                     col, true);
+            }
+         
+            image.setPixel(BarcodeImage.MAX_HEIGHT - 1, col, true);
+         }
+      
+         for(int i = 1; i <= this.text.length(); i++) 
+         {
+            writeCharToCol(i, this.text.charAt(i - 1));
          }
          
-         image.setPixel(BarcodeImage.MAX_HEIGHT - 1, col, true);
       }
-      
-      for(int i = 1; i <= this.text.length(); i++) 
+      catch(Exception ex) 
       {
-         writeCharToCol(i, this.text.charAt(i - 1));
+         System.out.println("Generate Image From Text Failed.");
+         return false;
       }
 
-      return false;
+      return true;
    }
 
    @Override
+   //converts a data matrix into text via ascii values
+   //calls readCharFromCol(int)
    public boolean translateImageToText()
    {
-      for(int c = 1; c < this.actualWidth - 1; c++) 
+      this.text = "";
+      try 
       {
-         this.text += readCharFromCol(c);
+         for(int c = 1; c < this.actualWidth - 1; c++) 
+         {         
+            this.text += readCharFromCol(c);
+         }
       }
-      return false;
+      catch(Exception ex) 
+      {
+         System.out.println("Translate Image To Text Failed.");
+         return false;
+      }
+      return true;
+
    }
 
    @Override
@@ -494,9 +525,14 @@ class DataMatrix implements BarcodeIO
    @Override
    public void displayImageToConsole()
    {
+      for(int b = 0; b < this.actualWidth + 2; b++) 
+      {
+         System.out.print("_");
+      }
+      System.out.println();
       for(int r = BarcodeImage.MAX_HEIGHT - this.actualHeight; r < BarcodeImage.MAX_HEIGHT; r++) 
       {
-         
+         System.out.print("|");
          for(int c = 0; c <= this.actualWidth - 1; c++) 
          {
             if(image.getPixel(r, c)) 
@@ -508,11 +544,9 @@ class DataMatrix implements BarcodeIO
                System.out.print(" ");
             }
          }
-         
-         System.out.println();
-         
+         System.out.print("|");
+         System.out.println();         
       }
- 
    }
    
    /**
@@ -579,3 +613,43 @@ class DataMatrix implements BarcodeIO
    
 }// end DataMatrix
 
+/***************OUTPUT**********************
+
+CSUMB CSIT online program is top notch.
+___________________________________________
+|* * * * * * * * * * * * * * * * * * * * *|
+|*                                       *|
+|****** **** ****** ******* ** *** *****  |
+|*     *    ******************************|
+|* **    * *        **  *    * * *   *    |
+|*   *    *  *****    *   * *   *  **  ***|
+|*  **     * *** **   **  *    **  ***  * |
+|***  * **   **  *   ****    *  *  ** * **|
+|*****  ***  *  * *   ** ** **  *   * *   |
+|*****************************************|
+You did it!  Great work.  Celebrate.
+________________________________________
+|* * * * * * * * * * * * * * * * * * * |
+|*                                    *|
+|**** *** **   ***** ****   *********  |
+|* ************ ************ **********|
+|** *      *    *  * * *         * *   |
+|***   *  *           * **    *      **|
+|* ** * *  *   * * * **  *   ***   *** |
+|* *           **    *****  *   **   **|
+|****  *  * *  * **  ** *   ** *  * *  |
+|**************************************|
+What a great resume builder this is!
+________________________________________
+|* * * * * * * * * * * * * * * * * * * |
+|*                                     |
+|***** * ***** ****** ******* **** **  |
+|* *********************************** |
+|**  *    *  * * **    *    * *  *  *  |
+|* *               *    **     **  *   |
+|**  *   * * *  * ***  * ***  *        |
+|**      **    * *    *     *    *  *  |
+|** *  * * **   *****  **  *    ** *** |
+|************************************* |
+
+ ********************************************/
